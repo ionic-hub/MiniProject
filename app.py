@@ -44,12 +44,12 @@ CUSTOM_WORDS = {
 # ── Initialize Flask ───────────────────────────────────────────────────────────
 app = Flask(__name__)
 
-# ── Configuration ──────────────────────────────────────────────────────────────
-DATA_FILE = os.path.join("data", "reviews.csv")
-MODEL_FILE = os.path.join("models", "model.pkl")
-TFIDF_FILE = os.path.join("models", "tfidf.pkl")
-METRICS_FILE = os.path.join("models", "metrics.json")
-KEYWORDS_FILE = os.path.join("models", "keywords.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "data", "reviews.csv")
+MODEL_FILE = os.path.join(BASE_DIR, "models", "model.pkl")
+TFIDF_FILE = os.path.join(BASE_DIR, "models", "tfidf.pkl")
+METRICS_FILE = os.path.join(BASE_DIR, "models", "metrics.json")
+KEYWORDS_FILE = os.path.join(BASE_DIR, "models", "keywords.json")
 
 
 # ── Load Resources ─────────────────────────────────────────────────────────────
@@ -100,8 +100,14 @@ def load_resources():
         print("⚠️  Keywords not found!")
 
     # Download NLTK resources
+    import tempfile
+    nltk_dir = os.path.join(tempfile.gettempdir(), 'nltk_data')
+    os.makedirs(nltk_dir, exist_ok=True)
+    if nltk_dir not in nltk.data.path:
+        nltk.data.path.append(nltk_dir)
+        
     for resource in ["punkt", "punkt_tab", "stopwords", "wordnet", "omw-1.4"]:
-        nltk.download(resource, quiet=True)
+        nltk.download(resource, download_dir=nltk_dir, quiet=True)
 
     resources["stop_words"] = set(stopwords.words("english"))
     resources["lemmatizer"] = WordNetLemmatizer()
